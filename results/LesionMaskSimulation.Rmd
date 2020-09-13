@@ -1,0 +1,152 @@
+---
+title: "Lesion Mask Simulation"
+author: "Petya Kindalova"
+date: "September 2020"
+output: 
+  html_document:
+    theme: united
+    toc: yes
+    toc_float: yes
+---
+# Set the ground for the simulations
+
+## Install R Markdown 
+```{r Install R Markdown}
+#install.packages("rmarkdown")
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Install required packages 
+```{r Install required packages}
+#install.packages("oro.nifti")
+#install.packages("neurobase")
+#install.packages("sp")
+#install.packages("RandomFieldsUtils")
+#install.packages("RandomFields")
+```
+
+## Load libraries 
+```{r Load required libraries, warning=FALSE, message=F}
+library(oro.nifti)
+library(neurobase)
+library(sp)
+library(RandomFieldsUtils)
+library(RandomFields)
+```
+
+# Simulate lesion masks
+
+## Set paths
+```{r paths}
+PATH_PROJ = "D:/Neuroimaging/Simulations/LesionMaskSimulation/" # Project path
+#
+PATH_DATA = file.path(PATH_PROJ, 'data') # Path where UKB summaries are stored
+PATH_MASKS = file.path(PATH_DATA, 'simulated_data') # Path where simulated lesion masks are stored
+PATH_UKB = file.path(PATH_DATA, 'UKB_summaries') # Path where real data summaries are stored 
+```
+
+## Main variables 
+```{r variables}
+var = 0.7 # Variance scale parameter
+scale = 1.3 # GRF scale parameter
+n_subj = 1000 # number of simulated lesion masks
+seed = 40 # set seed to ensure replicability
+```
+
+## Load UK Biobank (UKB) summaries
+```{r UKBsummaries}
+brain_mask = readNIfTI(paste0(PATH_DATA, "/MNI152_T1_2mm_brain_mask.nii.gz")) #MNI 2mm brain mask
+empir_prob = readNIfTI(paste0(PATH_UKB, "/empir_prob_mask.nii.gz")) # UKB empirical lesion incidence
+coef_age_ukbb = readNIfTI(paste0(PATH_UKB, "/coef_age_nvars_1_method_2.nii.gz")) # UKB estimated age effect
+coef_intercept_ukbb = readNIfTI(paste0(PATH_UKB, "/coef_(Intercept)_nvars_1_method_2.nii.gz")) # UKB estimated intercept effect
+```
+
+## Simulate age
+```{r age}
+# simulate age on the UKB age range to achieve similar mean
+set.seed(1)
+ages = round(runif(n_subj, min=45.12, max=80.65),digits=2)
+ages = sort(ages)
+
+# create a data set of those subjects
+nsubj_dataframe = data.frame(id = 1:n_subj, age = ages)
+nsubj_dataframe$file_name = ""
+
+# scale age since UKB coefficientt are obtained from a demeaned data set
+nsubj_dataframe$age = scale(nsubj_dataframe$age, scale=F)
+```
+
+## Simulate lesion masks
+```{r masks}
+# set model and mask size
+model = RMgauss(var=var, scale=scale)
+x_lim = 91
+y_lim = 109
+z_lim = 91
+x.seq = 1:x_lim
+y.seq = 1:y_lim
+z.seq = 1:z_lim
+
+# set seed
+set.seed(seed)
+
+# simulate lesion masks
+for (i in 1:n_subj){
+  
+  filename = paste0(i,"_T2_lesions_MNI_bin.nii.gz")
+  nsubj_dataframe$file_name[i] = filename
+  
+  grf_img = RFsimulate(model, x = x.seq, y = y.seq, z.seq, grid=T, spConform=FALSE)
+  
+  grf_img =as.nifti(grf_img)
+  dim(grf_img)
+  
+  xbeta = coef_intercept_ukbb + nsubj_dataframe$age[i] * coef_age_ukbb
+
+  z = grf_img + xbeta
+  rm(grf_img)
+  rm(xbeta)
+  
+  y_bin = z
+  y_bin[z<0] = 0
+  y_bin[z>0] = 1
+  rm(z)
+  y_bin[brain_mask==0] = 0 # exclude all voxels ouside of brain mask
+  y_bin[empir_prob==0] = 0 # exclude all zero lesion incidence voxels
+  y_bin = as.nifti(y_bin)
+  filename = paste0(PATH_MASKS, "/", i,"_T2_lesions_MNI_bin")
+  writeNIfTI(y_bin, filename)
+  
+  if(i%%100==0) {print(i)}
+  if(i==1) {
+    empir_temp = y_bin
+  } else {
+    empir_temp = empir_temp + y_bin 
+  }
+
+}
+```
+
+## Save empirical mask and *dat file
+```{r df}
+# save empirical lesion probability for simulated data set
+empir_temp = empir_temp / n_subj
+filename = paste0(PATH_MASKS, "/empir_prob_mask")
+writeNIfTI(empir_temp, filename)
+
+write.table(nsubj_dataframe[,1:3],
+            file=paste0(PATH_MASKS, "/", "GLM_sample1000.dat"),
+            row.names=FALSE, sep="\t", quote=FALSE)
+
+nsubj_dataframe$age = ages # raw ages
+write.table(nsubj_dataframe[,1:3],
+            file=paste0(PATH_MASKS, "/", "sample1000.dat"),
+            row.names=FALSE, sep="\t", quote=FALSE)
+```
+
+
+
+
