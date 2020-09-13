@@ -282,44 +282,17 @@ div.tocify {
 </div>
 <div id="load-libraries" class="section level2">
 <h2>Load libraries</h2>
-<pre class="r"><code>library(oro.nifti)</code></pre>
-<pre><code>## oro.nifti 0.11.0</code></pre>
-<pre class="r"><code>library(pryr)</code></pre>
-<pre><code>## Warning: package 'pryr' was built under R version 3.6.3</code></pre>
-<pre><code>## Registered S3 method overwritten by 'pryr':
-##   method      from
-##   print.bytes Rcpp</code></pre>
-<pre class="r"><code>library(enrichwith)</code></pre>
-<pre><code>## Warning: package 'enrichwith' was built under R version 3.6.3</code></pre>
-<pre class="r"><code>library(lpSolveAPI)</code></pre>
-<pre><code>## Warning: package 'lpSolveAPI' was built under R version 3.6.3</code></pre>
-<pre class="r"><code>library(brglm2)</code></pre>
-<pre><code>## Warning: package 'brglm2' was built under R version 3.6.3</code></pre>
-<pre class="r"><code>library(detectseparation)</code></pre>
-<pre><code>## Warning: package 'detectseparation' was built under R version 3.6.3</code></pre>
-<pre><code>## Registered S3 method overwritten by 'detectseparation':
-##   method                  from  
-##   print.detect_separation brglm2</code></pre>
-<pre><code>## 
-## Attaching package: 'detectseparation'</code></pre>
-<pre><code>## The following objects are masked from 'package:brglm2':
-## 
-##     check_infinite_estimates, checkInfiniteEstimates,
-##     detect_separation, detect_separation_control, detectSeparation,
-##     detectSeparationControl</code></pre>
-<pre class="r"><code>library(devtools) </code></pre>
-<pre><code>## Warning: package 'devtools' was built under R version 3.6.3</code></pre>
-<pre><code>## Loading required package: usethis</code></pre>
-<pre><code>## Warning: package 'usethis' was built under R version 3.6.3</code></pre>
-<pre class="r"><code>library(waldi)
-library(foreach)</code></pre>
-<pre><code>## Warning: package 'foreach' was built under R version 3.6.3</code></pre>
-<pre class="r"><code>library(doParallel)</code></pre>
-<pre><code>## Warning: package 'doParallel' was built under R version 3.6.3</code></pre>
-<pre><code>## Loading required package: iterators</code></pre>
-<pre><code>## Warning: package 'iterators' was built under R version 3.6.3</code></pre>
-<pre><code>## Loading required package: parallel</code></pre>
-<pre class="r"><code>library(iterators)</code></pre>
+<pre class="r"><code>library(oro.nifti)
+library(pryr)
+library(enrichwith)
+library(lpSolveAPI)
+library(brglm2)
+library(detectseparation)
+library(devtools) 
+library(waldi)
+library(foreach)
+library(doParallel)
+library(iterators)</code></pre>
 </div>
 <div id="set-paths" class="section level2">
 <h2>Set paths</h2>
@@ -349,7 +322,7 @@ empir_avail = 1 # flag: 0 (empirical probability is not available), 1 (empirical
 n_cores = 2 # number of cores for parallel GLM 
 link_fn = &quot;probit&quot; # options are logit and probit
 method = 2 # 1: ML, 2: MeanBR
-method_name = &quot;MeanBR&quot; # or change to &quot;MeanBR&quot;
+method_name = &quot;MeanBR&quot; # &quot;ML&quot; or &quot;MeanBR&quot;
 
 brain_mask = readNIfTI(paste0(PATH_PROJ, &quot;/data/MNI152_T1_2mm_brain_mask.nii.gz&quot;)) #MNI 2mm brain mask</code></pre>
 </div>
@@ -399,7 +372,7 @@ lesions_subj = all_subj(datafile = training_dataset,
  
 end_time = Sys.time()
 end_time - start_time</code></pre>
-<pre><code>## Time difference of 1.42423 mins</code></pre>
+<pre><code>## Time difference of 2.548649 mins</code></pre>
 <pre class="r"><code>save(list = ls(all.names = TRUE),
      file = paste0(PATH_TEMP, &quot;/step2.RData&quot;))</code></pre>
 </div>
@@ -551,7 +524,7 @@ load(filename_subset)
 n_coefs = length(output[[1]]$parameter) #obtain number of coefficients since it may differ from n_covs
 
 Sys.time()</code></pre>
-<pre><code>## [1] &quot;2020-09-12 17:15:06 BST&quot;</code></pre>
+<pre><code>## [1] &quot;2020-09-13 17:30:30 BST&quot;</code></pre>
 <pre class="r"><code>mapping_fn_vol2(brain_mask = brain_mask, 
                 tempdir = PATH_TEMP, 
                 mapping = mapping, 
@@ -586,7 +559,7 @@ Sys.time()</code></pre>
 ## [1] &quot;% scores less than 1e-05&quot;
 ## [1] 88 88</code></pre>
 <pre class="r"><code>Sys.time()</code></pre>
-<pre><code>## [1] &quot;2020-09-12 17:16:17 BST&quot;</code></pre>
+<pre><code>## [1] &quot;2020-09-13 17:32:34 BST&quot;</code></pre>
 </div>
 <div id="step-5-illustration-of-plots---to-add" class="section level1">
 <h1>Step 5: Illustration of plots - TO ADD?</h1>

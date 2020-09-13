@@ -12,16 +12,16 @@ output:
 # Set the ground for the simulations
 
 ## Install R Markdown 
-```{r Install R Markdown}
+
+```r
 #install.packages("rmarkdown")
 ```
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 ## Install required packages 
-```{r Install required packages}
+
+```r
 #install.packages("oro.nifti")
 #install.packages("pryr")
 #install.packages("enrichwith")
@@ -36,7 +36,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Load libraries 
-```{r Load required libraries, warning=FALSE, message=F}
+
+```r
 library(oro.nifti)
 library(pryr)
 library(enrichwith)
@@ -51,7 +52,8 @@ library(iterators)
 ```
 
 ## Set paths
-```{r paths}
+
+```r
 PATH_PROJ = "D:/Neuroimaging/Simulations/LesionMaskSimulation/" # Project path
 #
 PATH_DATA = file.path(PATH_PROJ, 'data', 'simulated_data') # Path where simulated lesion masks are stored
@@ -69,7 +71,8 @@ source(paste0(PATH_SRC, "/map_to_masks_step4.R"))
 ```
 
 ## Main variables 
-```{r variables}
+
+```r
 n_covs_cat = 0 # number of categorical covariates
 n_covs_cont = 1 # number of continuous covariates
 n_covs = n_covs_cat + n_covs_cont
@@ -78,14 +81,15 @@ empir_avail = 1 # flag: 0 (empirical probability is not available), 1 (empirical
 
 n_cores = 2 # number of cores for parallel GLM 
 link_fn = "probit" # options are logit and probit
-method = 2 # 1: ML, 2: MeanBR
-method_name = "MeanBR" # "ML" or "MeanBR"
+method = 1 # 1: ML, 2: MeanBR
+method_name = "ML" # or change to "MeanBR"
 
 brain_mask = readNIfTI(paste0(PATH_PROJ, "/data/MNI152_T1_2mm_brain_mask.nii.gz")) #MNI 2mm brain mask
 ```
 
 # Step 1: Calculate empirical lesion probability (if not available)
-```{r step1}
+
+```r
 if(!empir_avail) {
 start_time = Sys.time()
 temp = empir_prob(datafile = training_dataset,
@@ -104,7 +108,8 @@ save(list = ls(all.names = TRUE),
 ```
 
 # Step 2: Prepare binary lesion data for GLMs
-```{r step2}
+
+```r
 if(empir_avail) {
 	empir_prob_mask = readNIfTI(paste0(PATH_DATA, "/empir_prob_mask.nii")) #read in empirical probability mask
 	voxel_idx = as.matrix(which(empir_prob_mask!=0), col = 1)
@@ -120,6 +125,13 @@ if(empir_avail) {
 	voxel_IDs = read.table(paste0(PATH_TEMP, "/voxel_IDs.dat"), header=F)
 
 }
+```
+
+```
+## [1] 20300     1
+```
+
+```r
 voxel_IDs = as.matrix(voxel_IDs, nrow = 1)
 
 start_time = Sys.time()
@@ -129,14 +141,20 @@ lesions_subj = all_subj(datafile = training_dataset,
  
 end_time = Sys.time()
 end_time - start_time
+```
 
+```
+## Time difference of 2.87338 mins
+```
+
+```r
 save(list = ls(all.names = TRUE),
      file = paste0(PATH_TEMP, "/step2.RData"))
 ```
 
 # Step 3: Run GLMs
-```{r step3, warning=FALSE}
 
+```r
 load(paste0(PATH_TEMP, "/step2.RData"))
 
 #our proposed option is to parallelize in subsets of voxels
@@ -186,19 +204,127 @@ for(i in 1:n_subsets){
 }
 ```
 
+```
+## [1] 1
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 1
+## [1] 2
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 2
+## [1] 3
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 3
+## [1] 4
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 4
+## [1] 5
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 5
+## [1] 6
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 6
+## [1] 7
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 7
+## [1] 8
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 8
+## [1] 9
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 9
+## [1] 10
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 10
+## [1] 11
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 11
+## [1] 12
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 12
+## [1] 13
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 13
+## [1] 14
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 14
+## [1] 15
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 15
+## [1] 16
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 16
+## [1] 17
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 17
+## [1] 18
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 18
+## [1] 19
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 19
+## [1] 20
+## [1] 1000 1000
+## [1] "voxel_lesion ~ age"
+## [1] 20
+## [1] 21
+## [1]  300 1000
+## [1] "voxel_lesion ~ age"
+## [1] 21
+```
+
 # Step 4: Map results for all voxels to brain locations and save as nifti images
-```{r step4, warning=FALSE}
+
+```r
 mapping = read.table(paste0(PATH_TEMP, "/voxel_IDs.dat"), header=F)
 mapping = as.matrix(mapping, nrow = 1)
 n_subsets = ceiling(length(mapping)/1000)
 print("number of subsets of voxels")
-print(n_subsets)
+```
 
+```
+## [1] "number of subsets of voxels"
+```
+
+```r
+print(n_subsets)
+```
+
+```
+## [1] 21
+```
+
+```r
 filename_subset = paste0(PATH_TEMP, "/GLM_subset_",1, "_", method_name, "_Nvars_", n_covs,"_results.RData")
 load(filename_subset)
 n_coefs = length(output[[1]]$parameter) #obtain number of coefficients since it may differ from n_covs
 
 Sys.time()
+```
+
+```
+## [1] "2020-09-13 17:11:20 BST"
+```
+
+```r
 mapping_fn_vol2(brain_mask = brain_mask, 
                 tempdir = PATH_TEMP, 
                 mapping = mapping, 
@@ -207,9 +333,41 @@ mapping_fn_vol2(brain_mask = brain_mask,
                 n_coefs = n_coefs,
                 GLMmethod = method, 
                 outputdir = PATH_RESULTS)
+```
+
+```
+## [1] 1
+## [1] 2
+## [1] 3
+## [1] 4
+## [1] 5
+## [1] 6
+## [1] 7
+## [1] 8
+## [1] 9
+## [1] 10
+## [1] 11
+## [1] 12
+## [1] 13
+## [1] 14
+## [1] 15
+## [1] 16
+## [1] 17
+## [1] 18
+## [1] 19
+## [1] 20
+## [1] 21
+## [1] "% infinite/converging voxels out of mask voxels per variable"
+## [1] 32 32
+```
+
+```r
 Sys.time()
 ```
 
-# Step 5: Illustration of plots - TO ADD?
-```{r plots}
 ```
+## [1] "2020-09-13 17:12:42 BST"
+```
+
+# Step 5: Illustration of plots - TO ADD?
+

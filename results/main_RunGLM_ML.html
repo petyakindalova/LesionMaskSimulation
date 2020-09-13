@@ -372,7 +372,7 @@ lesions_subj = all_subj(datafile = training_dataset,
  
 end_time = Sys.time()
 end_time - start_time</code></pre>
-<pre><code>## Time difference of 1.404236 mins</code></pre>
+<pre><code>## Time difference of 2.87338 mins</code></pre>
 <pre class="r"><code>save(list = ls(all.names = TRUE),
      file = paste0(PATH_TEMP, &quot;/step2.RData&quot;))</code></pre>
 </div>
@@ -524,7 +524,7 @@ load(filename_subset)
 n_coefs = length(output[[1]]$parameter) #obtain number of coefficients since it may differ from n_covs
 
 Sys.time()</code></pre>
-<pre><code>## [1] &quot;2020-09-12 17:26:43 BST&quot;</code></pre>
+<pre><code>## [1] &quot;2020-09-13 17:11:20 BST&quot;</code></pre>
 <pre class="r"><code>mapping_fn_vol2(brain_mask = brain_mask, 
                 tempdir = PATH_TEMP, 
                 mapping = mapping, 
@@ -557,7 +557,7 @@ Sys.time()</code></pre>
 ## [1] &quot;% infinite/converging voxels out of mask voxels per variable&quot;
 ## [1] 32 32</code></pre>
 <pre class="r"><code>Sys.time()</code></pre>
-<pre><code>## [1] &quot;2020-09-12 17:27:46 BST&quot;</code></pre>
+<pre><code>## [1] &quot;2020-09-13 17:12:42 BST&quot;</code></pre>
 </div>
 <div id="step-5-illustration-of-plots---to-add" class="section level1">
 <h1>Step 5: Illustration of plots - TO ADD?</h1>
