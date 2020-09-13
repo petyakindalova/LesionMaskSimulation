@@ -1,41 +1,23 @@
-(This is the template README.md for this template project sharing repository; please see [HOWTO.md](HOWTO.md) for usage guidelines for this repo.)
-
-# Project/Paper Title
-
-<Project description>
+# Lesion mask simulation and analysis 
   
 ## Table of contents
    * [How to cite?](#how-to-cite)
    * [Contents overview](#contents-overview)
-   * [Reproducing figures and tables](#reproducing-figures-and-tables)
-      * [Table 1](#table-1)
-      * [Fig. 1](#fig-1)
-      * [Fig. 2](#fig-2)
    * [Reproducing full analysis](#reproducing-full-analysis)
 
 ## How to cite?
 
-See [CITATION](CITATION).
+See our manuscript on bioRxiv [CITATION](CITATION).
 
 # Contents overview
 
-<Summarise what's in this repository>
-
-## Reproducing figures and tables
-
-<Instructions on how to use summary/derived data in the `results` directory to create figures and tables>
-
-<Specify precise steps, including any datasets that need to be downloaded and path variables that need to be set>
-
-### Table 1
-
-### Fig. 1
-
-### Fig. 2
+The repository containts code for (1) lesion mask simulation, and (2) voxel-wise analysis of binary lesion masks utilising binary-response models (generalised linear models) and obtaining maximum likelihood estimates (ML) and mean bias-reduced estimates (MeanBR). The second step ensures scalability to biobank-scale neuroimaging data sets.  
 
 ## Reproducing full analysis
+Our manuscript compares..
 
-<Instructions on how to (1) obtain raw data; (2) process it to create summary/derived data in the `results`>
+### Simulate lesion masks
 
-<Specify precise steps, including any datasets that need to be downloaded and path variables that need to be set>
+
+### Run voxel-wise GLMs
 
