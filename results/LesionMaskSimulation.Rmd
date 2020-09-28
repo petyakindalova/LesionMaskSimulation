@@ -50,8 +50,8 @@ PATH_UKB = file.path(PATH_DATA, 'UKB_summaries') # Path where real data summarie
 
 ## Main variables 
 ```{r variables}
-var = 0.7 # Variance scale parameter
-scale = 1.3 # GRF scale parameter
+var = 1 # Variance scale parameter
+scale = 1.5 # GRF scale parameter
 n_subj = 1000 # number of simulated lesion masks
 seed = 40 # set seed to ensure replicability
 ```
@@ -106,13 +106,13 @@ for (i in 1:n_subj){
   
   xbeta = coef_intercept_ukbb + nsubj_dataframe$age[i] * coef_age_ukbb
 
-  z = grf_img + xbeta
+  z = pnorm(grf_img + xbeta)
   rm(grf_img)
   rm(xbeta)
   
   y_bin = z
-  y_bin[z<0] = 0
-  y_bin[z>0] = 1
+  y_bin[z<0.5] = 0
+  y_bin[z>=0.5] = 1
   rm(z)
   y_bin[brain_mask==0] = 0 # exclude all voxels ouside of brain mask
   y_bin[empir_prob==0] = 0 # exclude all zero lesion incidence voxels

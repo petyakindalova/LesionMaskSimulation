@@ -295,8 +295,8 @@ PATH_UKB = file.path(PATH_DATA, 'UKB_summaries') # Path where real data summarie
 </div>
 <div id="main-variables" class="section level2">
 <h2>Main variables</h2>
-<pre class="r"><code>var = 0.7 # Variance scale parameter
-scale = 1.3 # GRF scale parameter
+<pre class="r"><code>var = 1 # Variance scale parameter
+scale = 1.5 # GRF scale parameter
 n_subj = 1000 # number of simulated lesion masks
 seed = 40 # set seed to ensure replicability</code></pre>
 </div>
@@ -341,18 +341,21 @@ for (i in 1:n_subj){
   filename = paste0(i,&quot;_T2_lesions_MNI_bin.nii.gz&quot;)
   nsubj_dataframe$file_name[i] = filename
   
-  sim = RFsimulate(model, x = x.seq, y = y.seq, z.seq, grid=T, spConform=FALSE)
+  grf_img = RFsimulate(model, x = x.seq, y = y.seq, z.seq, grid=T, spConform=FALSE)
   
-  grf_img =as.nifti(sim)
+  grf_img =as.nifti(grf_img)
   dim(grf_img)
   
   xbeta = coef_intercept_ukbb + nsubj_dataframe$age[i] * coef_age_ukbb
 
-  z = grf_img + xbeta
+  z = pnorm(grf_img + xbeta)
+  rm(grf_img)
+  rm(xbeta)
   
   y_bin = z
-  y_bin[z&lt;0] = 0
-  y_bin[z&gt;0] = 1
+  y_bin[z&lt;0.5] = 0
+  y_bin[z&gt;=0.5] = 1
+  rm(z)
   y_bin[brain_mask==0] = 0 # exclude all voxels ouside of brain mask
   y_bin[empir_prob==0] = 0 # exclude all zero lesion incidence voxels
   y_bin = as.nifti(y_bin)

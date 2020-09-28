@@ -157,6 +157,7 @@ mapping_fn = function(brain_mask, tempdir, mapping, n_subsets = NULL, n_covs, GL
 mapping_fn_vol2 = function(brain_mask, tempdir, mapping, n_subsets = NULL, n_covs, n_coefs, GLMmethod, outputdir) {
   
   image_temp = brain_mask
+  image_temp[image_temp!=0] = 0
   
   ## create the fits list from all subsets of unique configurations
   if (GLMmethod == 1) {
@@ -339,19 +340,21 @@ mapping_fn_vol2 = function(brain_mask, tempdir, mapping, n_subsets = NULL, n_cov
     
     for(i in 1:(n_coefs)){
       temp_img_vars = image_temp
-      temp_img_vars[brain_mask!=0] = fits_zscore[1,i]
+      #temp_img_vars[brain_mask!=0] = fits_zscore[1,i]
       temp_img_vars[mapping]  = as.nifti(fits_zscore[,i], image_temp)
       filename_img = paste0("zscore_", names_covs[i], "_nvars_", n_covs, "_method_", GLMmethod)
       writeNIfTI(temp_img_vars, filename_img)
       
       temp_img_vars = image_temp
-      temp_img_vars[brain_mask!=0] = fits_estimate[1,i]
+      #temp_img_vars[brain_mask!=0] = fits_estimate[1,i]
+      print(summary(fits_estimate[,i]))
       temp_img_vars[mapping]  = as.nifti(fits_estimate[,i], image_temp)
+      print(summary(temp_img_vars))
       filename_img = paste0("coef_",names_covs[i], "_nvars_", n_covs, "_method_", GLMmethod)
       writeNIfTI(temp_img_vars, filename_img)
       
       temp_img_vars = image_temp
-      temp_img_vars[brain_mask!=0] = fits_stderr[1,i]
+      #temp_img_vars[brain_mask!=0] = fits_stderr[1,i]
       temp_img_vars[mapping]  = as.nifti(fits_stderr[,i], image_temp)
       filename_img = paste0("stderr_",names_covs[i], "_nvars_", n_covs, "_method_", GLMmethod)
       writeNIfTI(temp_img_vars, filename_img)

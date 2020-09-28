@@ -1,5 +1,5 @@
 ---
-title: "Run GLM and obtain meab bias-reduced (MeanBR) estimates"
+title: "Run GLM and obtain mean bias-reduced (MeanBR) estimates"
 author: "Petya Kindalova"
 date: "September 2020"
 output: 
@@ -38,6 +38,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Load libraries 
 ```{r Load required libraries, warning=FALSE, message=F}
 library(oro.nifti)
+library(neurobase)
 library(pryr)
 library(enrichwith)
 library(lpSolveAPI)
@@ -81,7 +82,7 @@ link_fn = "probit" # options are logit and probit
 method = 2 # 1: ML, 2: MeanBR
 method_name = "MeanBR" # "ML" or "MeanBR"
 
-brain_mask = readNIfTI(paste0(PATH_PROJ, "/data/MNI152_T1_2mm_brain_mask.nii.gz")) #MNI 2mm brain mask
+brain_mask = readNIfTI(paste0(PATH_PROJ, "/data/MNI152_T1_2mm_brain_mask.nii")) #MNI 2mm brain mask
 ```
 
 # Step 1: Calculate empirical lesion probability (if not available)
@@ -98,8 +99,8 @@ end_time - start_time
  
 print("time for empir prob and voxel IDs")
  
-save(list = ls(all.names = TRUE), 
-      file=paste0(tempdir, "/step1.RData"))
+#save(list = ls(all.names = TRUE), 
+#      file=paste0(tempdir, "/step1.RData"))
 } 
 ```
 
@@ -130,7 +131,7 @@ lesions_subj = all_subj(datafile = training_dataset,
 end_time = Sys.time()
 end_time - start_time
 
-save(list = ls(all.names = TRUE),
+save(lesions_subj,
      file = paste0(PATH_TEMP, "/step2.RData"))
 ```
 
