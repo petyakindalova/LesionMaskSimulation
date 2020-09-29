@@ -80,7 +80,16 @@ empir_avail = 1 # flag: 0 (empirical probability is not available), 1 (empirical
 n_cores = 2 # number of cores for parallel GLM 
 link_fn = "probit" # options are logit and probit
 method = 2 # 1: ML, 2: MeanBR
-method_name = "MeanBR" # "ML" or "MeanBR"
+
+if (method == 1) {
+  method_name = "ML"
+} else {
+  if(method==2) {
+    method_name = "meanBR"
+  } else {
+    stop("wrong method requested")
+  }
+}
 
 brain_mask = readNIfTI(paste0(PATH_PROJ, "/data/MNI152_T1_2mm_brain_mask.nii")) #MNI 2mm brain mask
 ```
@@ -200,7 +209,7 @@ load(filename_subset)
 n_coefs = length(output[[1]]$parameter) #obtain number of coefficients since it may differ from n_covs
 
 Sys.time()
-mapping_fn_vol2(brain_mask = brain_mask, 
+mapping_fn(brain_mask = brain_mask, 
                 tempdir = PATH_TEMP, 
                 mapping = mapping, 
                 n_subsets = n_subsets, 

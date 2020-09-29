@@ -3,9 +3,12 @@
 #'@param lesionfile matrix resulting from step 2
 #'@param n_covs_cont Number of continuous covariates
 #'@param n_covs_cat Number of categorical covariates
-#'@param GLMmethod Number indicating method, i.e. 1 for ML and 2 for meanBR (saving LA mean BR as well)
-#'@param link_fn Link function to be used for performing the GLM, i.e. 1 for logit or 2 for probit
+#'@param GLMmethod Number indicating method, i.e. 1 for ML and 2 for meanBR
+#'@param link_fn Link function to be used for performing the GLM, i.e. logit or probit
 #'@param outputdir Path for saving the resulting lists of GLM outputs
+#'@param subset subset ID, here used to split the number of regression; hard-coded subset size of 1000 regressions per subset
+#'@param n_cores number of cores to be used to parallelise the GLM implementation
+#'
 #'@return List of results for each voxels
 #'
 fit_glm_fn = function(datafile, lesionmat, n_covs_cat, n_covs_cont, GLMmethod = 2, link_fn = "logit", outputdir, 
@@ -16,7 +19,6 @@ fit_glm_fn = function(datafile, lesionmat, n_covs_cat, n_covs_cont, GLMmethod = 
   n_covs = ncol(datafile) - 2 
   #check number of covariates
   if(n_covs != (n_covs_cat + n_covs_cont)) stop("Something is wrong with data table or number of covariate supplied!")
-  
   
   
   ## Determine the model formula, to be used for each voxel-specific fit
@@ -63,6 +65,7 @@ fit_glm_fn = function(datafile, lesionmat, n_covs_cat, n_covs_cont, GLMmethod = 
   base_formula <- paste("voxel_lesion ~", all_vars)
   print(base_formula)
   
+  ## GLM function to be used in foreach 
   if (GLMmethod == 1) {
     fit_glm_chosen = function(j) {
       
@@ -82,9 +85,11 @@ fit_glm_fn = function(datafile, lesionmat, n_covs_cat, n_covs_cont, GLMmethod = 
       z_ml = coef(summary(fit_ml))[coefnames, "z value"]
       coef_ml = coef(summary(fit_ml))[coefnames, "Estimate"]
       stderr_ml = coef(summary(fit_ml))[coefnames, "Std. Error"]
-      fitted_ml = fit_ml$fitted.values
-      pearson_resid_ml = resid(fit_ml, type='pearson')
-      stud_pearson_resid_ml = resid(fit_ml, type='pearson')/sqrt(1 - hatvalues(fit_ml))
+      
+      #uncomment if you want to explore outliers
+      #fitted_ml = fit_ml$fitted.values
+      #pearson_resid_ml = resid(fit_ml, type='pearson')
+      #stud_pearson_resid_ml = resid(fit_ml, type='pearson')/sqrt(1 - hatvalues(fit_ml))
 
       
       ## Give z_ml value zero if infinite estimate
@@ -94,12 +99,11 @@ fit_glm_fn = function(datafile, lesionmat, n_covs_cat, n_covs_cont, GLMmethod = 
                   zscore = z_ml,
                   estimate = coef_ml,
                   stderr = stderr_ml,
-                  fitted = fitted_ml,
-		  pearson_resid = pearson_resid_ml,
-                  stud_pearson_resid = stud_pearson_resid_ml,
+                  #fitted = fitted_ml,
+		  #pearson_resid = pearson_resid_ml,
+                  #stud_pearson_resid = stud_pearson_resid_ml,
                   infinite = is_inf,
                   voxel = j)
-      #voxel_id = paste(unique_lesions[j,], collapse = ""))
       
       out
       
@@ -120,11 +124,13 @@ fit_glm_fn = function(datafile, lesionmat, n_covs_cat, n_covs_cont, GLMmethod = 
         z_br = coef(summary(fit_br))[coefnames, "z value"]
         coef_br = coef(summary(fit_br))[coefnames, "Estimate"]
         stderr_br = coef(summary(fit_br))[coefnames, "Std. Error"]
-        fitted_br = fit_br$fitted.values 
-        pearson_resid_br = resid(fit_br, type='pearson')
-        stud_pearson_resid_br = resid(fit_br, type='pearson')/sqrt(1 - hatvalues(fit_br))
         
+        #uncomment if you want to explore outliers
+        #fitted_br = fit_br$fitted.values 
+        #pearson_resid_br = resid(fit_br, type='pearson')
+        #stud_pearson_resid_br = resid(fit_br, type='pearson')/sqrt(1 - hatvalues(fit_br))
         
+        #uncomment if you want to explore location-adjusted z-scores
         #corz_br <- try(waldi(fit_br, null = 0, what = NULL, numerical=FALSE)[coefnames], silent = TRUE)
         #if (inherits(corz_br, "try-error")) {
         #  corz_br <- rep(NA, nvar)
@@ -139,13 +145,12 @@ fit_glm_fn = function(datafile, lesionmat, n_covs_cat, n_covs_cont, GLMmethod = 
                     estimate = coef_br,
                     stderr = stderr_br,
                     #LA_zscore = corz_br,
-                    fitted = fitted_br,
-		    pearson_resid = pearson_resid_br,	
-                    stud_pearson_resid = stud_pearson_resid_br,
+                    #fitted = fitted_br,
+		                #pearson_resid = pearson_resid_br,	
+                    #stud_pearson_resid = stud_pearson_resid_br,
                     status_br = status_br,
                     converged_br = converged_br,
                     voxel = j)
-        #voxel_id = paste(unique_lesions[j,], collapse = ""))
         
         out
         
@@ -157,6 +162,7 @@ fit_glm_fn = function(datafile, lesionmat, n_covs_cat, n_covs_cont, GLMmethod = 
   
   output = list()
   
+  # if no subset id provided
   if (is.null(subset)) {
     for ( i in 1:nrow(lesionmat)) {
       output[[i]] = fit_glm_chosen(i)
@@ -166,13 +172,15 @@ fit_glm_fn = function(datafile, lesionmat, n_covs_cat, n_covs_cont, GLMmethod = 
       }
     }
   } else {
-    
+    #if there is only 1 voxel in the subset
     if(nrow(lesionmat)==1) {
 	
         #registerDoParallel(cores=1)
-	output = list()
+	      output = list()
         output[[1]] = fit_glm_chosen(1)
+        
 	} else {
+	  
     registerDoParallel(cores=n_cores)
     
     output = foreach(i = 1:nrow(lesionmat), .packages = 'brglm2') %dopar% fit_glm_chosen(i)
