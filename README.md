@@ -18,6 +18,8 @@ Our manuscript compares three regression approaches for modelling binary lesion 
 
 We design a novel simulation framework of artificial lesion maps to compare the three alternative lesion mapping methods. The age effect on lesion probability estimated from a reference data set (13,680 individuals from the UK Biobank) is used to simulate a realistic voxel-wise distribution of lesions across age. To mimic the real features of lesion masks, we suggest matching brain lesion summaries (total lesion volume, average lesion size and lesion count) across the reference data set and the simulated data sets. Thus, we allow for a fair comparison between the modelling approaches, under a realistic simulation setting.
 
+The illustrative example here includes the simulation of 1000 lesion masks and fitting GLMs using our parallel implementation in two Rmd files as follows.
+
 ### Simulate lesion masks
 File `LesionMaskSimulation.Rmd` in folder `results/` contains the steps used to simulate 1000 lesion masks (simulated lesion masks saved in `data/simulated_data`). The Gaussian Random Field parameters were selected as in our manuscript [CITATION](CITATION) and the real data set used to obtain the intercept and age regression coefficients voxel-wise contained 13,680 UK Biobank individuals. 
 
