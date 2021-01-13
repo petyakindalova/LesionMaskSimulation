@@ -7,5 +7,5 @@ File `main_RunGLM.Rmd` contains the steps used to run mass-univariate generalise
 
 The folders `ML` and `MeanBR` contain the GLM results, i.e. coeficient masks (e.g. `coef_age_nvars_1_method_2.nii.gz`) and standard error masks along with their standardised coefficient masks. 
 
-## Figures
-**TO DO** File `Plots.Rmd` contains an illustration of the spatial plots (axial slices) as in our manuscript. 
+<!--## Figures
+**TO DO** File `Plots.Rmd` contains an illustration of the spatial plots (axial slices) as in our manuscript. -->
